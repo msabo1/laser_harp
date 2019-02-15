@@ -33,7 +33,7 @@ void setup() {
 void loop() {
   for(int i = 0; i<8; i++){
     if(analogRead(ldr[i]) < ref){
-      play(note[octave][i]);
+      play(note[octave*7 + i]);
     }
   }
 
