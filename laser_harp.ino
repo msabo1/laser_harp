@@ -17,6 +17,9 @@ int note[50] = {NOTE_C1, NOTE_D1, NOTE_E1, NOTE_F1, NOTE_G1, NOTE_A1, NOTE_B1,
 
 int ref = 800; //referent sensor value
 int octave = 0;
+int mode = 0;
+int modeRefTime = 4000; //time to triger mode change
+int laserCutTime[4] = {0, 0, 0, 0};
 
 void play(int note){
   tone(speakerPin, note, 100);
@@ -34,6 +37,19 @@ void playMode(){
   }
 }
 
+void checkModeChange(int cmode){
+  if(analogRead(ldr[cmode]) < ref && !laserCutTime[cmode]){
+    laserCutTime = millis();
+  }else if(analogRead(ldr[cmode]) > ref){
+    laserCutTime[cmode] = 0;
+  }
+
+  if(laserCutTime[cmode] && millis() - laserCutTime[cmode] > modeRefTime){
+    laserCutTime[cmode] = 0;
+    mode = cmode;
+  }
+}
+
 void setup() {
   for(int i = 0; i < 8; i++){
     pinMode(ldr[i], INPUT);
@@ -43,5 +59,6 @@ void setup() {
 }
 
 void loop() {
+
   playMode();
 }
