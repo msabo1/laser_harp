@@ -1,4 +1,4 @@
-#include "pitch.h"
+#include "init.h"
 
 //Define pins
 int ldr[8] = {A0, A1, A2, A3, A4, A5, A6, A7};
@@ -31,10 +31,5 @@ void setup() {
 }
 
 void loop() {
-  for(int i = 0; i<8; i++){
-    if(analogRead(ldr[i]) < ref){
-      play(note[octave*7 + i]);
-    }
-  }
-
+  playMode();
 }
