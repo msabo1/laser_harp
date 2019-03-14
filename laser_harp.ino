@@ -23,6 +23,10 @@ void play(int note){
 }
 
 void playMode(){
+  for (int i = 0; i<8; i++){
+    digitalWrite(laser[i], HIGH);
+  }
+
   for(int i = 0; i<8; i++){
     if(analogRead(ldr[i]) < ref){
       play(note[octave*7 + i]);
