@@ -19,7 +19,7 @@ int ref = 800; //referent sensor value
 int octave = 0;
 
 void play(int note){
-  tone(speakerPin, note);
+  tone(speakerPin, note, 100);
 }
 
 void setup() {
