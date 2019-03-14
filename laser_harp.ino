@@ -40,13 +40,26 @@ void playMode(){
 void checkModeChange(int cmode){
   if(analogRead(ldr[cmode]) < ref && !laserCutTime[cmode]){
     laserCutTime = millis();
-  }else if(analogRead(ldr[cmode]) > ref){
-    laserCutTime[cmode] = 0;
   }
 
   if(laserCutTime[cmode] && millis() - laserCutTime[cmode] > modeRefTime){
     laserCutTime[cmode] = 0;
+    //turn off all other lasers
+    for (int i = 0; i<cmode; i++){
+    digitalWrite(laser[i], LOW);
+    }
+
+    for (int i = cmode + 1; i<8; i++){
+    digitalWrite(laser[i], LOW);
+    }
+    //wait until hand is moved
+    while(analogRead(ldr[cmode]) < ref){}
+    //change mode
     mode = cmode;
+  }
+
+  if(analogRead(ldr[cmode]) > ref){
+    laserCutTime[cmode] = 0;
   }
 }
 
