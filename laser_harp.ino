@@ -42,12 +42,13 @@ void checkModeChange(int cmode){
     for(int i = 0; i < 8; i++){
       laserCutTime[i] = 0;
     }
-    
+
     laserCutTime[cmode] = millis();
   }
 
   if(laserCutTime[cmode] && millis() - laserCutTime[cmode] > modeRefTime){
     laserCutTime[cmode] = 0;
+    play(note[octave*7 + cmode]); //sound signal
     //turn off all other lasers
     for (int i = 0; i < cmode; i++){
     digitalWrite(laser[i], LOW);
@@ -64,6 +65,29 @@ void checkModeChange(int cmode){
 
   if(analogRead(ldr[cmode]) > ref){
     laserCutTime[cmode] = 0;
+  }
+}
+
+void changeOctave(){
+  for (int i = 0; i < 8; i++){
+    digitalWrite(laser[i], HIGH);
+  }
+
+  for(int i = 0; i < 8; i++){
+    if(analogRead(ldr[i]) < ref){
+      play(note[i*7 + i]); //sound signal
+      //turn off all other lasers
+      for (int j = 0; j < i; j++){
+      digitalWrite(laser[j], LOW);
+      }
+      for (int j = i + 1; j < 8; j++){
+      digitalWrite(laser[j], LOW);
+      }
+      //wait until hand is moved
+      while(analogRead(ldr[i]) < ref){}
+      octave = i;
+      mode = 0;
+    }
   }
 }
 
@@ -87,6 +111,7 @@ void loop() {
       playMode();
       break;
     case 1:
+    changeOctave();
       break;
   }
 }
