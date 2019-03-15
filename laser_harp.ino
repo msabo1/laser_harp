@@ -19,18 +19,18 @@ int ref = 800; //referent sensor value
 int octave = 0;
 int mode = 0;
 int modeRefTime = 4000; //time to triger mode change
-int laserCutTime[4] = {0, 0, 0, 0};
+unsigned long laserCutTime[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 void play(int note){
   tone(speakerPin, note, 100);
 }
 
 void playMode(){
-  for (int i = 0; i<8; i++){
+  for (int i = 0; i < 8; i++){
     digitalWrite(laser[i], HIGH);
   }
 
-  for(int i = 0; i<8; i++){
+  for(int i = 0; i < 8; i++){
     if(analogRead(ldr[i]) < ref){
       play(note[octave*7 + i]);
     }
@@ -39,17 +39,21 @@ void playMode(){
 
 void checkModeChange(int cmode){
   if(analogRead(ldr[cmode]) < ref && !laserCutTime[cmode]){
-    laserCutTime = millis();
+    for(int i = 0; i < 8; i++){
+      laserCutTime[i] = 0;
+    }
+    
+    laserCutTime[cmode] = millis();
   }
 
   if(laserCutTime[cmode] && millis() - laserCutTime[cmode] > modeRefTime){
     laserCutTime[cmode] = 0;
     //turn off all other lasers
-    for (int i = 0; i<cmode; i++){
+    for (int i = 0; i < cmode; i++){
     digitalWrite(laser[i], LOW);
     }
 
-    for (int i = cmode + 1; i<8; i++){
+    for (int i = cmode + 1; i < 8; i++){
     digitalWrite(laser[i], LOW);
     }
     //wait until hand is moved
@@ -72,6 +76,17 @@ void setup() {
 }
 
 void loop() {
+  if(!mode){
+    for(int cmode = 1; cmode < 4; cmode++){
+      checkModeChange(cmode);
+    }
+  }
 
-  playMode();
+  switch(mode){
+    case 0:
+      playMode();
+      break;
+    case 1:
+      break;
+  }
 }
