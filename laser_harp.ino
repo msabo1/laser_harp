@@ -17,12 +17,17 @@ int note[50] = {NOTE_C1, NOTE_D1, NOTE_E1, NOTE_F1, NOTE_G1, NOTE_A1, NOTE_B1,
 
 int ref = 800; //referent sensor value
 int octave = 0;
+int output = 0;
 int mode = 0;
 int modeRefTime = 4000; //time to triger mode change
 unsigned long laserCutTime[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 void play(int note){
-  tone(speakerPin, note, 100);
+  if(!output){
+    tone(speakerPin, note, 100);
+  }else{
+    
+  }
 }
 
 void playMode(){
@@ -91,12 +96,27 @@ void changeOctave(){
   }
 }
 
+void changeOutput(){
+  digitalWrite(laser[0], HIGH);
+  digitalWrite(laser[1], HIGH);
+  for(int i = 0; i < 2; i++){
+    if(analogRead(ldr[i] < ref)){
+      play(note[octave*7 + i]);
+      digitalWrite(laser[(i + 1) % 2], LOW);
+      while(analogRead(ldr[i] < ref)){}
+      output = i;
+      mode = 0;
+    }
+  }
+}
+
 void setup() {
   for(int i = 0; i < 8; i++){
     pinMode(ldr[i], INPUT);
     pinMode(laser[i], OUTPUT);
   }
   pinMode(speakerPin, OUTPUT);
+  Serial.begin(9600);
 }
 
 void loop() {
@@ -111,7 +131,9 @@ void loop() {
       playMode();
       break;
     case 1:
-    changeOctave();
+      changeOctave();
       break;
+    case 2:
+      changeOutput();
   }
 }
