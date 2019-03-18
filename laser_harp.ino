@@ -14,20 +14,30 @@ int note[50] = {NOTE_C1, NOTE_D1, NOTE_E1, NOTE_F1, NOTE_G1, NOTE_A1, NOTE_B1,
                 NOTE_C6, NOTE_D6, NOTE_E6, NOTE_F6, NOTE_G6, NOTE_A6, NOTE_B6,
                 NOTE_C7, NOTE_D7, NOTE_E7, NOTE_F7, NOTE_G7, NOTE_A7, NOTE_B7,
                 NOTE_C8};
+int midiNote[7] = {24, 26, 28, 29, 31, 33, 35, 36}
 
 int ref = 800; //referent sensor value
-int octave = 0;
+int octave = 3;
 int output = 0;
 int mode = 0;
 int modeRefTime = 4000; //time to triger mode change
 unsigned long laserCutTime[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
-void play(int note){
+void play(int notePos, int oct = octave){
   if(!output){
-    tone(speakerPin, note, 100);
+    tone(speakerPin, note[oct*7 + notePos], 100);
   }else{
-    
+    Serial.write(0x90);
+    Serial.write(midiNote[notePos] + oct*12);
+    Serial.write(0x7F);
   }
+}
+
+void stopPlaying(int notePos, oct = octave){
+  noTone(speakerPin);
+  Serial.write(0x90);
+  Serial.write(midiNote[notePos] + oct*12);
+  Serial.write(0x00);
 }
 
 void playMode(){
@@ -37,7 +47,9 @@ void playMode(){
 
   for(int i = 0; i < 8; i++){
     if(analogRead(ldr[i]) < ref){
-      play(note[octave*7 + i]);
+      play(i);
+    }else{
+      stopPlaying(i);
     }
   }
 }
@@ -53,7 +65,7 @@ void checkModeChange(int cmode){
 
   if(laserCutTime[cmode] && millis() - laserCutTime[cmode] > modeRefTime){
     laserCutTime[cmode] = 0;
-    play(note[octave*7 + cmode]); //sound signal
+    play(cmode); //sound signal
     //turn off all other lasers
     for (int i = 0; i < cmode; i++){
     digitalWrite(laser[i], LOW);
@@ -80,7 +92,7 @@ void changeOctave(){
 
   for(int i = 0; i < 8; i++){
     if(analogRead(ldr[i]) < ref){
-      play(note[i*7 + i]); //sound signal
+      play(i, i); //sound signal
       //turn off all other lasers
       for (int j = 0; j < i; j++){
       digitalWrite(laser[j], LOW);
@@ -101,7 +113,7 @@ void changeOutput(){
   digitalWrite(laser[1], HIGH);
   for(int i = 0; i < 2; i++){
     if(analogRead(ldr[i] < ref)){
-      play(note[octave*7 + i]);
+      play(i);
       digitalWrite(laser[(i + 1) % 2], LOW);
       while(analogRead(ldr[i] < ref)){}
       output = i;
