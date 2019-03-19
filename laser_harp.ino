@@ -14,7 +14,7 @@ int note[50] = {NOTE_C1, NOTE_D1, NOTE_E1, NOTE_F1, NOTE_G1, NOTE_A1, NOTE_B1,
                 NOTE_C6, NOTE_D6, NOTE_E6, NOTE_F6, NOTE_G6, NOTE_A6, NOTE_B6,
                 NOTE_C7, NOTE_D7, NOTE_E7, NOTE_F7, NOTE_G7, NOTE_A7, NOTE_B7,
                 NOTE_C8};
-int midiNote[7] = {24, 26, 28, 29, 31, 33, 35, 36}
+int midiNote[8] = {24, 26, 28, 29, 31, 33, 35, 36}
 
 int ref = 800; //referent sensor value
 int octave = 3;
@@ -76,6 +76,10 @@ void checkModeChange(int cmode){
     }
     //wait until hand is moved
     while(analogRead(ldr[cmode]) < ref){}
+    //stop playing all notes
+    for(int i = 0; i < 8; i++){
+      stopPlaying(i);
+    }
     //change mode
     mode = cmode;
   }
