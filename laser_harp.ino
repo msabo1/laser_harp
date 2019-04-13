@@ -23,6 +23,14 @@ int mode = 0;
 int modeRefTime = 4000; //time to triger mode change
 unsigned long laserCutTime[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
+void setup() {
+  for(int i = 0; i < 8; i++){
+    pinMode(ldr[i], INPUT);
+    pinMode(laser[i], OUTPUT);
+  }
+  pinMode(speakerPin, OUTPUT);
+}
+
 void play(int notePos, int oct = octave){
   if(!output){
     tone(speakerPin, note[oct*7 + notePos], 100);
@@ -119,25 +127,26 @@ void changeOctave(){
 void changeOutput(){
   digitalWrite(laser[0], HIGH);
   digitalWrite(laser[1], HIGH);
+  for(int i = 2; i < 8; i++){
+    digitalWrite(laser[i], LOW);
+  }
   for(int i = 0; i < 2; i++){
     if(analogRead(ldr[i] < ref)){
       play(i, octave);
       digitalWrite(laser[(i + 1) % 2], LOW);
       while(analogRead(ldr[i] < ref)){}
+      delay(10);
       output = i;
+      if(output){
+        Serial.begin(9600);
+      }else{
+        Serial.end();
+      }
       mode = 0;
+      break;
     }
-    delay(10);
+    delay(20);
   }
-}
-
-void setup() {
-  for(int i = 0; i < 8; i++){
-    pinMode(ldr[i], INPUT);
-    pinMode(laser[i], OUTPUT);
-  }
-  pinMode(speakerPin, OUTPUT);
-  //Serial.begin(9600);
 }
 
 void loop() {
@@ -160,5 +169,8 @@ void loop() {
       break;
     case 2:
       changeOutput();
+    default:
+      playMode();
+      break;
   }
 }
