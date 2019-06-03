@@ -125,20 +125,29 @@ void changeOctave(){
 }
 
 void changeOutput(){
-  digitalWrite(laser[0], HIGH);
-  digitalWrite(laser[1], HIGH);
-  for(int i = 2; i < 8; i++){
+  for (int i = 0; i < 2; i++){
+    digitalWrite(laser[i], HIGH);
+  }
+  for (int i = 2; i < 8; i++){
     digitalWrite(laser[i], LOW);
   }
+  delay(20);
   for(int i = 0; i < 2; i++){
-    if(analogRead(ldr[i] < ref)){
-      play(i, octave);
-      digitalWrite(laser[(i + 1) % 2], LOW);
-      while(analogRead(ldr[i] < ref)){}
+    if(analogRead(ldr[i]) < ref){
+      play(i, i); //sound signal
+      //turn off all other lasers
+      for (int j = 0; j < i; j++){
+      digitalWrite(laser[j], LOW);
+      }
+      for (int j = i + 1; j < 8; j++){
+      digitalWrite(laser[j], LOW);
+      }
+      //wait until hand is moved
+      while(analogRead(ldr[i]) < ref){}
       delay(10);
       output = i;
       if(output){
-        Serial.begin(9600);
+        Serial.begin(115200);
       }else{
         Serial.end();
       }
@@ -169,6 +178,7 @@ void loop() {
       break;
     case 2:
       changeOutput();
+      break;
     default:
       playMode();
       break;
