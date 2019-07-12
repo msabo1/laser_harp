@@ -22,6 +22,7 @@ int output = 0;
 int mode = 0;
 int modeRefTime = 4000; //time to triger mode change
 unsigned long laserCutTime[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+bool isPlaying[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 void setup() {
   for(int i = 0; i < 8; i++){
@@ -54,10 +55,13 @@ void playMode(){
     digitalWrite(laser[i], HIGH);
   }
   for(int i = 0; i < 8; i++){
-    if(analogRead(ldr[i]) < ref){
+    if(analogRead(ldr[i]) < ref && !isPlaying[i]){
       play(i, octave);
-    }else{
+      isPlaying[i] = 1;
+     }
+    if(analogRead(ldr[i]) >= ref){
       stopPlaying(i);
+      isPlaying[i] = 0;
     }
   }
 }
